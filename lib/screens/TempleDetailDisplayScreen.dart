@@ -10,7 +10,7 @@ import 'dart:convert';
 import '../models/Temple.dart';
 
 import '../utility/Utility.dart';
-import '../utility/MapUtil.dart';
+//import '../utility/MapUtil.dart';
 
 class TempleDetailDisplayScreen extends StatefulWidget {
   final String date;
@@ -34,6 +34,8 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
   Set<Marker> _markers = {};
 
   late CameraPosition _initialCameraPosition;
+
+  late LatLng _latLng;
 
   /// 初期動作
   @override
@@ -65,13 +67,12 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
     _utility.makeYMDYData(widget.date.toString());
 
     if (_isLoading) {
-      _initialCameraPosition = CameraPosition(
-        target: LatLng(
-          _templeMaps[_utility.year]![0].lat,
-          _templeMaps[_utility.year]![0].lng,
-        ),
-        zoom: 15,
+      _latLng = LatLng(
+        double.parse(_templeMaps[_utility.year]![0].lat),
+        double.parse(_templeMaps[_utility.year]![0].lng),
       );
+
+      _initialCameraPosition = CameraPosition(target: _latLng, zoom: 15);
     }
 
     return Scaffold(
@@ -200,10 +201,7 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
         _markers.add(
           Marker(
             markerId: MarkerId('id-01'),
-            position: LatLng(
-              _templeMaps[_utility.year]![0].lat,
-              _templeMaps[_utility.year]![0].lng,
-            ),
+            position: _latLng,
             infoWindow:
                 InfoWindow(title: _templeMaps[_utility.year]![0].temple),
           ),

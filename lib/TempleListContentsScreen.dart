@@ -1,6 +1,8 @@
 // ignore_for_file: file_names, prefer_const_constructors_in_immutables
 
 import 'package:flutter/material.dart';
+import 'package:flutter_temple2/screens/YearlyTempleDisplayScreen.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
 
 import 'dart:math';
@@ -34,6 +36,8 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
 
   bool _isLoading = false;
 
+  Set<Marker> _markerSets = {};
+
   /// 初期動作
   @override
   void initState() {
@@ -50,6 +54,21 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
     final temple = templeFromJson(response.body);
     _templeMaps = temple.data;
     ///////////////////////////////////
+
+    //--------------------------// marker
+    for (var i = 0; i < _templeMaps[widget.year]!.length; i++) {
+      _markerSets.add(
+        Marker(
+          markerId: MarkerId('id-${i}'),
+          position: LatLng(
+            double.parse(_templeMaps[widget.year]![i].lat),
+            double.parse(_templeMaps[widget.year]![i].lng),
+          ),
+          infoWindow: InfoWindow(title: _templeMaps[widget.year]![i].temple),
+        ),
+      );
+    }
+    //--------------------------// marker
 
     setState(() {
       _isLoading = true;
@@ -107,9 +126,17 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
                         },
                       ),
                     ),
-                    Text(
-                      widget.year,
-                      style: const TextStyle(fontSize: 20),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => _goYearyTempleDisplayScreen(),
+                          icon: Icon(Icons.map),
+                        ),
+                        Text(
+                          widget.year,
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -190,6 +217,19 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
       MaterialPageRoute(
         builder: (context) => TempleDetailDisplayScreen(
           date: date,
+        ),
+      ),
+    );
+  }
+
+  ///
+  void _goYearyTempleDisplayScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => YearlyTempleDisplayScreen(
+          year: widget.year,
+          marker: _markerSets,
         ),
       ),
     );
