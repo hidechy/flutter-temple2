@@ -9,6 +9,8 @@ import 'models/Temple.dart';
 
 import 'utility/Utility.dart';
 
+import 'screens/TempleDetailDisplayScreen.dart';
+
 class TempleListContentsScreen extends StatefulWidget {
   final String year;
 
@@ -150,6 +152,15 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
                                       ],
                                     ),
                                   ),
+                                  trailing: GestureDetector(
+                                    onTap: () => _goTempleDetailDisplayScreen(
+                                        date: _listDate),
+                                    child: const Icon(
+                                      Icons.call_made,
+                                      color: Colors.redAccent,
+                                      size: 20,
+                                    ),
+                                  ),
                                 ),
                               );
                             },
@@ -158,11 +169,27 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
                             itemCount: _shirineList!.length,
                           ),
                         )
-                      : const CircularProgressIndicator(),
+                      : const Center(
+                          child: CircularProgressIndicator(),
+                        ),
                 ),
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  ///////////////////////////////////////
+
+  ///
+  void _goTempleDetailDisplayScreen({required String date}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TempleDetailDisplayScreen(
+          date: date,
         ),
       ),
     );

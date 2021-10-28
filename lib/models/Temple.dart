@@ -38,8 +38,10 @@ class Shrine {
     required this.memo,
     required this.address,
     required this.station,
-    required this.gohonzon,
+    this.gohonzon,
     required this.thumbnail,
+    this.lat,
+    this.lng,
     required this.photo,
   });
 
@@ -51,6 +53,8 @@ class Shrine {
   dynamic gohonzon;
   List<String> photo;
   String thumbnail;
+  dynamic lat;
+  dynamic lng;
 
   factory Shrine.fromJson(Map<String, dynamic> json) => Shrine(
         date: DateTime.parse(json["date"]),
@@ -61,6 +65,8 @@ class Shrine {
         gohonzon: json["gohonzon"],
         photo: List<String>.from(json["photo"].map((x) => x)),
         thumbnail: json["thumbnail"],
+        lat: json["lat"],
+        lng: json["lng"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -73,5 +79,7 @@ class Shrine {
         "gohonzon": gohonzon,
         "photo": List<dynamic>.from(photo.map((x) => x)),
         "thumbnail": thumbnail,
+        "lat": lat,
+        "lng": lng,
       };
 }

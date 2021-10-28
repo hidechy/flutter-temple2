@@ -105,6 +105,8 @@ class _TempleListMenuScreenState extends State<TempleListMenuScreen> {
     );
   }
 
+  ///////////////////////////////////////
+
   ///
   void _goTempleListScreen({required String year}) {
     Navigator.pushReplacement(

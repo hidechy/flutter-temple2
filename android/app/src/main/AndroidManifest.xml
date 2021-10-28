@@ -3,6 +3,8 @@
    <application
         android:label="flutter_temple2"
         android:icon="@mipmap/ic_launcher">
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyD9PkTM1Pur3YzmO-v4VzS0r8ZZ0jRJTIU"/>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
