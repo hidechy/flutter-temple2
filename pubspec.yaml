@@ -21,6 +21,8 @@ dependencies:
   flutter_launcher_icons:
   get:
   font_awesome_flutter:
+  carousel_slider:
+  avatar_glow:
 
 dev_dependencies:
   flutter_test:

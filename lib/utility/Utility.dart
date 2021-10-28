@@ -66,4 +66,21 @@ class Utility {
       colorBlendMode: BlendMode.darken,
     );
   }
+
+  ///
+  String makePhotoTime({required String file, required String date}) {
+    String time = "";
+
+    var exFilePath = (file).split('/');
+    var fileName = exFilePath[exFilePath.length - 1];
+    var exFileName = fileName.split('.');
+    var exDateTime = exFileName[0].split('_');
+    if (exDateTime[1].length == 9) {
+      var hour = exDateTime[1].substring(0, 2);
+      var minute = exDateTime[1].substring(2, 4);
+      time = '${hour}:${minute}';
+    }
+
+    return time;
+  }
 }

@@ -67,7 +67,7 @@ class _TempleListMenuScreenState extends State<TempleListMenuScreen> {
               alignment: Alignment.topLeft,
               child: const Text(
                 'Year Select',
-                style: TextStyle(fontSize: 30),
+                style: TextStyle(fontSize: 20),
               ),
             ),
             Expanded(
@@ -85,9 +85,12 @@ class _TempleListMenuScreenState extends State<TempleListMenuScreen> {
                       title: Row(
                         children: [
                           Text(_yearsList[index],
-                              style: const TextStyle(fontSize: 16)),
+                              style: const TextStyle(fontSize: 12)),
                           const SizedBox(width: 10),
-                          Text('（$_shirineCount）'),
+                          Text(
+                            '（$_shirineCount）',
+                            style: TextStyle(fontSize: 12),
+                          ),
                         ],
                       ),
                       onTap: () => _goTempleListScreen(year: _yearsList[index]),
