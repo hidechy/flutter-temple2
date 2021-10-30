@@ -88,9 +88,10 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
 
     String apiKey = 'AIzaSyD9PkTM1Pur3YzmO-v4VzS0r8ZZ0jRJTIU';
     String url2 =
-        'https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&mode=walking&language=ja&key=${apiKey}';
+        'https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&mode=walking&language=ja&key=$apiKey';
     Response response2 = await get(Uri.parse(url2));
 
+    _canDispPolyline = false;
     if (response2.statusCode == 200) {
       var decoded = jsonDecode(response2.body);
 
@@ -126,14 +127,14 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
     _utility.makeYMDYData(widget.date.toString());
 
     if (_isLoading) {
-      var ex_origin = (origin).split(',');
+      var exOrigin = (origin).split(',');
 
       _markers.add(
         Marker(
-          markerId: MarkerId('origin'),
+          markerId: const MarkerId('origin'),
           position: LatLng(
-            double.parse(ex_origin[0]),
-            double.parse(ex_origin[1]),
+            double.parse(exOrigin[0]),
+            double.parse(exOrigin[1]),
           ),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         ),
@@ -212,7 +213,7 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
                     polylines: {
                       if (_dispPolyline)
                         Polyline(
-                          polylineId: PolylineId('overview_polyline'),
+                          polylineId: const PolylineId('overview_polyline'),
                           color: Colors.redAccent,
                           width: 10,
                           points: polylinePoints

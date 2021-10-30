@@ -24,6 +24,7 @@ dependencies:
   carousel_slider:
   avatar_glow:
   flutter_polyline_points:
+  cached_network_image:
 
 dev_dependencies:
   flutter_test:

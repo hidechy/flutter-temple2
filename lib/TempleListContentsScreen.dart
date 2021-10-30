@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_temple2/screens/YearlyTempleDisplayScreen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'dart:math';
 
@@ -161,12 +162,9 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
                                 child: ListTile(
                                   leading: Container(
                                     width: 40,
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: NetworkImage(
-                                            _shirineList[index].thumbnail),
-                                        fit: BoxFit.fill,
-                                      ),
+                                    child: FadeInImage.assetNetwork(
+                                      placeholder: 'assets/images/no_image.png',
+                                      image: _shirineList[index].thumbnail,
                                     ),
                                   ),
                                   title: DefaultTextStyle(
