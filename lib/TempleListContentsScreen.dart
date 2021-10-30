@@ -36,7 +36,7 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
 
   bool _isLoading = false;
 
-  Set<Marker> _markerSets = {};
+  final Set<Marker> _markerSets = {};
 
   /// 初期動作
   @override
@@ -59,7 +59,7 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
     for (var i = 0; i < _templeMaps[widget.year]!.length; i++) {
       _markerSets.add(
         Marker(
-          markerId: MarkerId('id-${i}'),
+          markerId: MarkerId('id-$i'),
           position: LatLng(
             double.parse(_templeMaps[widget.year]![i].lat),
             double.parse(_templeMaps[widget.year]![i].lng),
@@ -130,7 +130,7 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
                       children: [
                         IconButton(
                           onPressed: () => _goYearyTempleDisplayScreen(),
-                          icon: Icon(Icons.map),
+                          icon: const Icon(Icons.map),
                         ),
                         Text(
                           widget.year,

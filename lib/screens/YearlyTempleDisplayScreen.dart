@@ -1,3 +1,5 @@
+// ignore_for_file: file_names, prefer_const_constructors_in_immutables
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -7,7 +9,9 @@ class YearlyTempleDisplayScreen extends StatefulWidget {
   final String year;
   final Set<Marker> marker;
 
-  YearlyTempleDisplayScreen({required this.year, required this.marker});
+  YearlyTempleDisplayScreen(
+      {Key? key, required this.year, required this.marker})
+      : super(key: key);
 
   @override
   _YearlyTempleDisplayScreenState createState() =>
@@ -20,7 +24,7 @@ class _YearlyTempleDisplayScreenState extends State<YearlyTempleDisplayScreen> {
   ///
   @override
   Widget build(BuildContext context) {
-    LatLng _latLng = LatLng(35.7102009, 139.9490672);
+    LatLng _latLng = const LatLng(35.7102009, 139.9490672);
 
     CameraPosition _initialCameraPosition =
         CameraPosition(target: _latLng, zoom: 11);
@@ -46,12 +50,12 @@ class _YearlyTempleDisplayScreenState extends State<YearlyTempleDisplayScreen> {
                       ),
                       Text(
                         '（${itemCount.toString()}）',
-                        style: TextStyle(fontSize: 12),
+                        style: const TextStyle(fontSize: 12),
                       ),
                     ],
                   ),
                   Container(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     alignment: Alignment.topRight,
                     child: GestureDetector(
                       child: const Icon(

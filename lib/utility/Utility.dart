@@ -78,7 +78,7 @@ class Utility {
     if (exDateTime[1].length == 9) {
       var hour = exDateTime[1].substring(0, 2);
       var minute = exDateTime[1].substring(2, 4);
-      time = '${hour}:${minute}';
+      time = '$hour:$minute';
     }
 
     return time;

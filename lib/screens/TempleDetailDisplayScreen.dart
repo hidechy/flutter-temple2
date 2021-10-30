@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, prefer_const_constructors_in_immutables
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_temple2/screens/PhotoDisplayScreen.dart';
 import 'package:http/http.dart';
@@ -31,11 +32,13 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
 
   bool _isLoading = false;
 
-  Set<Marker> _markers = {};
+  final Set<Marker> _markers = {};
 
   late CameraPosition _initialCameraPosition;
 
   late LatLng _latLng;
+
+  bool _isEnlarge = false;
 
   /// 初期動作
   @override
@@ -55,7 +58,6 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
     final temple = templeFromJson(response.body);
     _templeMaps = temple.data;
     ///////////////////////////////////
-
     setState(() {
       _isLoading = true;
     });
@@ -75,6 +77,8 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
       _initialCameraPosition = CameraPosition(target: _latLng, zoom: 15);
     }
 
+    Size size = MediaQuery.of(context).size;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -85,7 +89,7 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
               children: [
                 const SizedBox(height: 40),
                 Container(
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   alignment: Alignment.topRight,
                   child: GestureDetector(
                     child: const Icon(
@@ -116,7 +120,7 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
 
                 //------------------------------// Map
                 SizedBox(
-                  height: 250,
+                  height: (_isEnlarge) ? (size.height - 300) : 250,
                   child: GoogleMap(
                     onMapCreated: _onMapCreated,
                     markers: _markers,
@@ -125,9 +129,32 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
                 ),
                 //------------------------------// Map
 
-                SizedBox(height: 10),
-                Text(_templeMaps[_utility.year]![0].address),
-                Text(_templeMaps[_utility.year]![0].station),
+                const SizedBox(height: 10),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(_templeMaps[_utility.year]![0].address),
+                          Text(_templeMaps[_utility.year]![0].station),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      alignment: Alignment.topRight,
+                      child: GestureDetector(
+                        child: const Icon(
+                          Icons.center_focus_strong,
+                          color: Colors.red,
+                        ),
+                        onTap: () => _mapEnlarge(),
+                      ),
+                    ),
+                  ],
+                ),
 
                 Container(
                   height: 5,
@@ -136,49 +163,58 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
                 ),
 
                 /////////////////////////// photo
-                Container(
-                  height: 100,
-                  margin: EdgeInsets.only(top: 20),
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        margin: EdgeInsets.only(right: 10),
-                        width: 70,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(
-                                _templeMaps[_utility.year]![0].photo[index]),
-                            fit: BoxFit.fill,
+                (_isEnlarge)
+                    ? Container()
+                    : Column(
+                        children: [
+                          Container(
+                            height: 100,
+                            margin: const EdgeInsets.only(top: 20),
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  margin: const EdgeInsets.only(right: 10),
+                                  width: 70,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: NetworkImage(
+                                          _templeMaps[_utility.year]![0]
+                                              .photo[index]),
+                                      fit: BoxFit.fill,
+                                    ),
+                                  ),
+                                );
+                              },
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(height: 0.2),
+                              itemCount:
+                                  _templeMaps[_utility.year]![0].photo.length,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 0.2),
-                    itemCount: _templeMaps[_utility.year]![0].photo.length,
-                  ),
-                ),
-                /////////////////////////// photo
-
-                Container(
-                  padding: EdgeInsets.only(top: 20, right: 10),
-                  alignment: Alignment.topRight,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.red[900],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                          Container(
+                            padding: const EdgeInsets.only(top: 20, right: 10),
+                            alignment: Alignment.topRight,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.red[900],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              onPressed: () => _goPhotoDisplayScreen(
+                                  data: _templeMaps[_utility.year]![0]),
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 30),
+                                child: const Text('Gallery'),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    onPressed: () => _goPhotoDisplayScreen(
-                        data: _templeMaps[_utility.year]![0]),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 30),
-                      child: Text('Gallery'),
-                    ),
-                  ),
-                ),
+
+                /////////////////////////// photo
               ],
             )
           else
@@ -200,7 +236,7 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
       () {
         _markers.add(
           Marker(
-            markerId: MarkerId('id-01'),
+            markerId: const MarkerId('id-01'),
             position: _latLng,
             infoWindow:
                 InfoWindow(title: _templeMaps[_utility.year]![0].temple),
@@ -210,8 +246,14 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
     );
   }
 
-  //////////////////////////////////
+  ///
+  void _mapEnlarge() {
+    setState(() {
+      _isEnlarge = !_isEnlarge;
+    });
+  }
 
+  //////////////////////////////////
   ///
   void _goPhotoDisplayScreen({required Shrine data}) {
     _utility.makeYMDYData(data.date.toString());

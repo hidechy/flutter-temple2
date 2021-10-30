@@ -1,6 +1,5 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, prefer_const_constructors_in_immutables
 
-import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
@@ -12,7 +11,9 @@ class PhotoDisplayScreen extends StatefulWidget {
   final Shrine data;
   final String firstPhotoTime;
 
-  PhotoDisplayScreen({required this.data, required this.firstPhotoTime});
+  PhotoDisplayScreen(
+      {Key? key, required this.data, required this.firstPhotoTime})
+      : super(key: key);
 
   @override
   _PhotoDisplayScreenState createState() => _PhotoDisplayScreenState();
@@ -25,6 +26,8 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
 
   String _photoTime = "";
 
+  late Size size;
+
   ///
   @override
   void initState() {
@@ -36,6 +39,8 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
   ///
   @override
   Widget build(BuildContext context) {
+    size = MediaQuery.of(context).size;
+
     var _listDate =
         '${widget.data.date.year.toString().padLeft(4, '0')}-${widget.data.date.month.toString().padLeft(2, '0')}-${widget.data.date.day.toString().padLeft(2, '0')}';
 
@@ -48,7 +53,7 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
             children: [
               const SizedBox(height: 40),
               Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 alignment: Alignment.topRight,
                 child: GestureDetector(
                   child: const Icon(
@@ -77,21 +82,10 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
                 decoration: BoxDecoration(color: Colors.red[900]),
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 40),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    (_current == 0)
-                        ? Icon(
-                            Icons.forward,
-                            color: Colors.white,
-                          )
-                        : Container(),
-                    Text(
-                      _photoTime,
-                      style: TextStyle(fontSize: 25),
-                    ),
-                  ],
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Text(
+                  _photoTime,
+                  style: const TextStyle(fontSize: 25),
                 ),
               ),
               CarouselSlider(
@@ -132,9 +126,43 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
                 ).toList(),
               ),
             ],
-          )
+          ),
+          _makeIndicator(),
         ],
       ),
+    );
+  }
+
+  ///
+  Widget _makeIndicator() {
+    List<Widget> _list = [];
+
+    var _photoNum = widget.data.photo.length;
+
+    for (var i = 0; i < _photoNum; i++) {
+      _list.add(
+        Container(
+          width: 20,
+          height: 5,
+          margin: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            color: (_current == i) ? Colors.redAccent : Colors.grey,
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Expanded(child: Container()),
+        Container(
+          width: (size.width / 10 * 8),
+          height: (size.height / 15),
+          alignment: Alignment.topRight,
+          child: Wrap(children: _list),
+        ),
+      ],
     );
   }
 }

@@ -89,7 +89,7 @@ class _TempleListMenuScreenState extends State<TempleListMenuScreen> {
                           const SizedBox(width: 10),
                           Text(
                             '（$_shirineCount）',
-                            style: TextStyle(fontSize: 12),
+                            style: const TextStyle(fontSize: 12),
                           ),
                         ],
                       ),
