@@ -1,10 +1,9 @@
 // ignore_for_file: file_names, prefer_const_constructors_in_immutables
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_temple2/screens/PhotoDisplayScreen.dart';
 import 'package:http/http.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 import 'dart:convert';
 
@@ -12,6 +11,8 @@ import '../models/Temple.dart';
 
 import '../utility/Utility.dart';
 //import '../utility/MapUtil.dart';
+
+import 'PhotoDisplayScreen.dart';
 
 class TempleDetailDisplayScreen extends StatefulWidget {
   final String date;
@@ -40,6 +41,25 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
 
   bool _isEnlarge = false;
 
+  late GoogleMapController _googleMapController;
+
+  late LatLngBounds bounds;
+  List<PointLatLng> polylinePoints = [];
+  String distance = '';
+  String duration = '';
+
+  bool _canDispPolyline = false;
+  bool _dispPolyline = false;
+
+  String origin = '';
+
+  ///
+  @override
+  void dispose() {
+    _googleMapController.dispose();
+    super.dispose();
+  }
+
   /// 初期動作
   @override
   void initState() {
@@ -50,6 +70,8 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
 
   /// 初期データ作成
   void _makeDefaultDisplayData() async {
+    origin = '35.7102009,139.9490672';
+
     ///////////////////////////////////
     String url = "http://toyohide.work/BrainLog/api/getDateTemple";
     String body = json.encode({"date": widget.date});
@@ -58,6 +80,41 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
     final temple = templeFromJson(response.body);
     _templeMaps = temple.data;
     ///////////////////////////////////
+
+    //------------------//
+    _utility.makeYMDYData(widget.date.toString());
+    String destination =
+        '${_templeMaps[_utility.year]![0].lat},${_templeMaps[_utility.year]![0].lng}';
+
+    String apiKey = 'AIzaSyD9PkTM1Pur3YzmO-v4VzS0r8ZZ0jRJTIU';
+    String url2 =
+        'https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&mode=walking&language=ja&key=${apiKey}';
+    Response response2 = await get(Uri.parse(url2));
+
+    if (response2.statusCode == 200) {
+      var decoded = jsonDecode(response2.body);
+
+      var data = decoded['routes'][0];
+
+      final _sw = data['bounds']['southwest'];
+      final southwest = LatLng(_sw['lat'], _sw['lng']);
+      final _ne = data['bounds']['northeast'];
+      final northeast = LatLng(_ne['lat'], _ne['lng']);
+      bounds = LatLngBounds(southwest: southwest, northeast: northeast);
+
+      if ((data['legs'] as List).isNotEmpty) {
+        final leg = data['legs'][0];
+        distance = leg['distance']['text'];
+        duration = leg['duration']['text'];
+      }
+
+      polylinePoints =
+          PolylinePoints().decodePolyline(data['overview_polyline']['points']);
+
+      _canDispPolyline = true;
+    }
+    //------------------//
+
     setState(() {
       _isLoading = true;
     });
@@ -69,12 +126,38 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
     _utility.makeYMDYData(widget.date.toString());
 
     if (_isLoading) {
+      var ex_origin = (origin).split(',');
+
+      _markers.add(
+        Marker(
+          markerId: MarkerId('origin'),
+          position: LatLng(
+            double.parse(ex_origin[0]),
+            double.parse(ex_origin[1]),
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        ),
+      );
+
       _latLng = LatLng(
         double.parse(_templeMaps[_utility.year]![0].lat),
         double.parse(_templeMaps[_utility.year]![0].lng),
       );
 
-      _initialCameraPosition = CameraPosition(target: _latLng, zoom: 15);
+      _initialCameraPosition = CameraPosition(
+        target: _latLng,
+        zoom: 15,
+        tilt: 50.0,
+      );
+
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('distination'),
+          position: _latLng,
+          infoWindow: InfoWindow(title: _templeMaps[_utility.year]![0].temple),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+      );
     }
 
     Size size = MediaQuery.of(context).size;
@@ -120,28 +203,35 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
 
                 //------------------------------// Map
                 SizedBox(
-                  height: (_isEnlarge) ? (size.height - 300) : 250,
+                  height: (_isEnlarge) ? (size.height - 350) : 220,
                   child: GoogleMap(
-                    onMapCreated: _onMapCreated,
+                    onMapCreated: (controller) =>
+                        _googleMapController = controller,
                     markers: _markers,
                     initialCameraPosition: _initialCameraPosition,
+                    polylines: {
+                      if (_dispPolyline)
+                        Polyline(
+                          polylineId: PolylineId('overview_polyline'),
+                          color: Colors.redAccent,
+                          width: 10,
+                          points: polylinePoints
+                              .map((e) => LatLng(e.latitude, e.longitude))
+                              .toList(),
+                        ),
+                    },
                   ),
                 ),
                 //------------------------------// Map
 
                 const SizedBox(height: 10),
 
+                Text(_templeMaps[_utility.year]![0].address),
+                Text(_templeMaps[_utility.year]![0].station),
+                Text(distance),
+
                 Row(
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(_templeMaps[_utility.year]![0].address),
-                          Text(_templeMaps[_utility.year]![0].station),
-                        ],
-                      ),
-                    ),
                     Container(
                       padding: const EdgeInsets.all(10),
                       alignment: Alignment.topRight,
@@ -151,6 +241,41 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
                           color: Colors.red,
                         ),
                         onTap: () => _mapEnlarge(),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      alignment: Alignment.topRight,
+                      child: GestureDetector(
+                        child: const Icon(
+                          Icons.flag,
+                          color: Colors.red,
+                        ),
+                        onTap: () => _backFlagPosition(),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      alignment: Alignment.topRight,
+                      child: GestureDetector(
+                        child: const Icon(
+                          Icons.vignette_rounded,
+                          color: Colors.red,
+                        ),
+                        onTap: () => _googleMapController.animateCamera(
+                          CameraUpdate.newLatLngBounds(bounds, 100),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      alignment: Alignment.topRight,
+                      child: GestureDetector(
+                        child: const Icon(
+                          Icons.stacked_line_chart,
+                          color: Colors.red,
+                        ),
+                        onTap: () => _polylineDisp(),
                       ),
                     ),
                   ],
@@ -227,29 +352,25 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
   }
 
   ///
-  void _onMapCreated(GoogleMapController controller) {
-//    controller.setMapStyle(MapUtil.mapStyle);
+  void _mapEnlarge() {
+    setState(() {
+      _isEnlarge = !_isEnlarge;
 
-    _utility.makeYMDYData(widget.date.toString());
+      _backFlagPosition();
+    });
+  }
 
-    setState(
-      () {
-        _markers.add(
-          Marker(
-            markerId: const MarkerId('id-01'),
-            position: _latLng,
-            infoWindow:
-                InfoWindow(title: _templeMaps[_utility.year]![0].temple),
-          ),
-        );
-      },
+  ///
+  void _backFlagPosition() {
+    _googleMapController.animateCamera(
+      CameraUpdate.newCameraPosition(_initialCameraPosition),
     );
   }
 
   ///
-  void _mapEnlarge() {
+  void _polylineDisp() {
     setState(() {
-      _isEnlarge = !_isEnlarge;
+      _dispPolyline = !_dispPolyline;
     });
   }
 

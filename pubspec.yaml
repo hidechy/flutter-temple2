@@ -23,6 +23,7 @@ dependencies:
   font_awesome_flutter:
   carousel_slider:
   avatar_glow:
+  flutter_polyline_points:
 
 dev_dependencies:
   flutter_test:

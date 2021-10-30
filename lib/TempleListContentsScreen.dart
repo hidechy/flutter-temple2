@@ -83,12 +83,13 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
     List<Shrine>? _shirineList = _templeMaps[widget.year];
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 600),
       transform: Matrix4.translationValues(
         xOffset,
         yOffset,
         0,
       )..rotateZ((isDrawerOpen) ? (pi / 20) : 0),
+      curve: Curves.easeIn,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: (isDrawerOpen)
