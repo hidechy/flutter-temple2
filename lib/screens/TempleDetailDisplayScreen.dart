@@ -53,6 +53,8 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
 
   String origin = '';
 
+  bool _isMyHome = true;
+
   ///
   @override
   void dispose() {
@@ -70,8 +72,6 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
 
   /// 初期データ作成
   void _makeDefaultDisplayData() async {
-    origin = '35.7102009,139.9490672';
-
     ///////////////////////////////////
     String url = "http://toyohide.work/BrainLog/api/getDateTemple";
     String body = json.encode({"date": widget.date});
@@ -81,6 +81,16 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
     _templeMaps = temple.data;
     ///////////////////////////////////
 
+    origin = '35.7102009,139.9490672';
+    _makePolyline(origin: origin);
+
+    setState(() {
+      _isLoading = true;
+    });
+  }
+
+  ///
+  void _makePolyline({required String origin}) async {
     //------------------//
     _utility.makeYMDYData(widget.date.toString());
     String destination =
@@ -95,30 +105,30 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
     if (response2.statusCode == 200) {
       var decoded = jsonDecode(response2.body);
 
-      var data = decoded['routes'][0];
+      if (decoded['routes'].length > 0) {
+        var data = decoded['routes'][0];
 
-      final _sw = data['bounds']['southwest'];
-      final southwest = LatLng(_sw['lat'], _sw['lng']);
-      final _ne = data['bounds']['northeast'];
-      final northeast = LatLng(_ne['lat'], _ne['lng']);
-      bounds = LatLngBounds(southwest: southwest, northeast: northeast);
+        final _sw = data['bounds']['southwest'];
+        final southwest = LatLng(_sw['lat'], _sw['lng']);
+        final _ne = data['bounds']['northeast'];
+        final northeast = LatLng(_ne['lat'], _ne['lng']);
+        bounds = LatLngBounds(southwest: southwest, northeast: northeast);
 
-      if ((data['legs'] as List).isNotEmpty) {
-        final leg = data['legs'][0];
-        distance = leg['distance']['text'];
-        duration = leg['duration']['text'];
+        if ((data['legs'] as List).isNotEmpty) {
+          final leg = data['legs'][0];
+          distance = leg['distance']['text'];
+          duration = leg['duration']['text'];
+        }
+
+        polylinePoints = PolylinePoints()
+            .decodePolyline(data['overview_polyline']['points']);
+
+        _canDispPolyline = true;
       }
-
-      polylinePoints =
-          PolylinePoints().decodePolyline(data['overview_polyline']['points']);
-
-      _canDispPolyline = true;
     }
     //------------------//
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() {});
   }
 
   ///
@@ -215,7 +225,7 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
                         Polyline(
                           polylineId: const PolylineId('overview_polyline'),
                           color: Colors.redAccent,
-                          width: 10,
+                          width: 5,
                           points: polylinePoints
                               .map((e) => LatLng(e.latitude, e.longitude))
                               .toList(),
@@ -232,53 +242,93 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
                 Text(distance),
 
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      alignment: Alignment.topRight,
-                      child: GestureDetector(
-                        child: const Icon(
-                          Icons.center_focus_strong,
-                          color: Colors.red,
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          alignment: Alignment.topRight,
+                          child: GestureDetector(
+                            child: const Icon(
+                              Icons.center_focus_strong,
+                              color: Colors.red,
+                            ),
+                            onTap: () => _mapEnlarge(),
+                          ),
                         ),
-                        onTap: () => _mapEnlarge(),
-                      ),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          alignment: Alignment.topRight,
+                          child: GestureDetector(
+                            child: const Icon(
+                              Icons.flag,
+                              color: Colors.red,
+                            ),
+                            onTap: () => _backFlagPosition(),
+                          ),
+                        ),
+                      ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      alignment: Alignment.topRight,
-                      child: GestureDetector(
-                        child: const Icon(
-                          Icons.flag,
-                          color: Colors.red,
+                    //----------------//s
+                    Row(
+                      children: [
+                        (_canDispPolyline)
+                            ? Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    alignment: Alignment.topRight,
+                                    child: GestureDetector(
+                                      child: const Icon(
+                                        Icons.vignette_rounded,
+                                        color: Colors.red,
+                                      ),
+                                      onTap: () =>
+                                          _googleMapController.animateCamera(
+                                        CameraUpdate.newLatLngBounds(
+                                            bounds, 100),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    alignment: Alignment.topRight,
+                                    child: GestureDetector(
+                                      child: const Icon(
+                                        Icons.stacked_line_chart,
+                                        color: Colors.red,
+                                      ),
+                                      onTap: () => _polylineDisp(),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Container(),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.red[900]!.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            children: [
+                              Text('実家'),
+                              new Switch(
+                                value: _isMyHome,
+                                onChanged: _changeSwitch,
+                                activeColor: Colors.white,
+                                activeTrackColor: Colors.orangeAccent,
+                                inactiveThumbColor: Colors.white,
+                                inactiveTrackColor: Colors.orangeAccent,
+                              ),
+                              Text('自宅'),
+                            ],
+                          ),
                         ),
-                        onTap: () => _backFlagPosition(),
-                      ),
+                      ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      alignment: Alignment.topRight,
-                      child: GestureDetector(
-                        child: const Icon(
-                          Icons.vignette_rounded,
-                          color: Colors.red,
-                        ),
-                        onTap: () => _googleMapController.animateCamera(
-                          CameraUpdate.newLatLngBounds(bounds, 100),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      alignment: Alignment.topRight,
-                      child: GestureDetector(
-                        child: const Icon(
-                          Icons.stacked_line_chart,
-                          color: Colors.red,
-                        ),
-                        onTap: () => _polylineDisp(),
-                      ),
-                    ),
+                    //----------------//e
                   ],
                 ),
 
@@ -350,6 +400,25 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
         ],
       ),
     );
+  }
+
+  ///
+  void _changeSwitch(bool e) {
+    //setState(() => _active = e);
+
+    setState(() {
+      if (e) {
+        //Funabashi
+        origin = '35.7102009,139.9490672';
+      } else {
+        //Zenpukuji
+        origin = '35.7185071,139.5869534';
+      }
+
+      _makePolyline(origin: origin);
+
+      _isMyHome = e;
+    });
   }
 
   ///

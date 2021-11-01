@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_temple2/screens/YearlyTempleDisplayScreen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 import 'dart:math';
 
@@ -84,13 +83,13 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
     List<Shrine>? _shirineList = _templeMaps[widget.year];
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 2000),
       transform: Matrix4.translationValues(
         xOffset,
         yOffset,
         0,
       )..rotateZ((isDrawerOpen) ? (pi / 20) : 0),
-      curve: Curves.easeIn,
+      curve: Curves.elasticIn,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: (isDrawerOpen)
@@ -160,7 +159,7 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
                               return Card(
                                 color: Colors.black.withOpacity(0.3),
                                 child: ListTile(
-                                  leading: Container(
+                                  leading: SizedBox(
                                     width: 40,
                                     child: FadeInImage.assetNetwork(
                                       placeholder: 'assets/images/no_image.png',
