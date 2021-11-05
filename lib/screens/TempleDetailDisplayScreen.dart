@@ -55,6 +55,8 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
 
   bool _isMyHome = true;
 
+  int _mapType = 1;
+
   ///
   @override
   void dispose() {
@@ -178,220 +180,236 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
         children: [
           _utility.getBackGround(),
           if (_isLoading)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 40),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  alignment: Alignment.topRight,
-                  child: GestureDetector(
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.red,
+            SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 40),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    alignment: Alignment.topRight,
+                    child: GestureDetector(
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.red,
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
                     ),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
                   ),
-                ),
-                Text(widget.date),
-                Text(
-                  _templeMaps[_utility.year]![0].temple,
-                  style: const TextStyle(fontSize: 24),
-                ),
-                (_templeMaps[_utility.year]![0].gohonzon != "")
-                    ? Text(_templeMaps[_utility.year]![0].gohonzon)
-                    : Container(),
-                (_templeMaps[_utility.year]![0].memo != "")
-                    ? Text('With. ${_templeMaps[_utility.year]![0].memo}')
-                    : Container(),
-                Container(
-                  height: 5,
-                  margin: const EdgeInsets.symmetric(vertical: 5),
-                  decoration: BoxDecoration(color: Colors.red[900]),
-                ),
-
-                //------------------------------// Map
-                SizedBox(
-                  height: (_isEnlarge) ? (size.height - 350) : 220,
-                  child: GoogleMap(
-                    onMapCreated: (controller) =>
-                        _googleMapController = controller,
-                    markers: _markers,
-                    initialCameraPosition: _initialCameraPosition,
-                    polylines: {
-                      if (_dispPolyline)
-                        Polyline(
-                          polylineId: const PolylineId('overview_polyline'),
-                          color: Colors.redAccent,
-                          width: 5,
-                          points: polylinePoints
-                              .map((e) => LatLng(e.latitude, e.longitude))
-                              .toList(),
-                        ),
-                    },
+                  Text(widget.date),
+                  Text(
+                    _templeMaps[_utility.year]![0].temple,
+                    style: const TextStyle(fontSize: 24),
                   ),
-                ),
-                //------------------------------// Map
+                  (_templeMaps[_utility.year]![0].gohonzon != "")
+                      ? Text(_templeMaps[_utility.year]![0].gohonzon)
+                      : Container(),
+                  (_templeMaps[_utility.year]![0].memo != "")
+                      ? Text('(With) ${_templeMaps[_utility.year]![0].memo}')
+                      : Container(),
+                  Container(
+                    height: 5,
+                    margin: const EdgeInsets.symmetric(vertical: 5),
+                    decoration: BoxDecoration(color: Colors.red[900]),
+                  ),
 
-                const SizedBox(height: 10),
-
-                Text(_templeMaps[_utility.year]![0].address),
-                Text(_templeMaps[_utility.year]![0].station),
-                Text(distance),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          alignment: Alignment.topRight,
-                          child: GestureDetector(
-                            child: const Icon(
-                              Icons.center_focus_strong,
-                              color: Colors.red,
-                            ),
-                            onTap: () => _mapEnlarge(),
+                  //------------------------------// Map
+                  SizedBox(
+                    height: (_isEnlarge) ? (size.height - 350) : 220,
+                    child: GoogleMap(
+                      mapType:
+                          (_mapType == 1) ? MapType.normal : MapType.satellite,
+                      onMapCreated: (controller) =>
+                          _googleMapController = controller,
+                      markers: _markers,
+                      initialCameraPosition: _initialCameraPosition,
+                      polylines: {
+                        if (_dispPolyline)
+                          Polyline(
+                            polylineId: const PolylineId('overview_polyline'),
+                            color: Colors.redAccent,
+                            width: 5,
+                            points: polylinePoints
+                                .map((e) => LatLng(e.latitude, e.longitude))
+                                .toList(),
                           ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          alignment: Alignment.topRight,
-                          child: GestureDetector(
-                            child: const Icon(
-                              Icons.flag,
-                              color: Colors.red,
-                            ),
-                            onTap: () => _backFlagPosition(),
-                          ),
-                        ),
-                      ],
+                      },
                     ),
-                    //----------------//s
-                    Row(
-                      children: [
-                        (_canDispPolyline)
-                            ? Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(10),
-                                    alignment: Alignment.topRight,
-                                    child: GestureDetector(
-                                      child: const Icon(
-                                        Icons.vignette_rounded,
-                                        color: Colors.red,
-                                      ),
-                                      onTap: () =>
-                                          _googleMapController.animateCamera(
-                                        CameraUpdate.newLatLngBounds(
-                                            bounds, 100),
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.all(10),
-                                    alignment: Alignment.topRight,
-                                    child: GestureDetector(
-                                      child: const Icon(
-                                        Icons.stacked_line_chart,
-                                        color: Colors.red,
-                                      ),
-                                      onTap: () => _polylineDisp(),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : Container(),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.red[900]!.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Row(
-                            children: [
-                              Text('実家'),
-                              new Switch(
-                                value: _isMyHome,
-                                onChanged: _changeSwitch,
-                                activeColor: Colors.white,
-                                activeTrackColor: Colors.orangeAccent,
-                                inactiveThumbColor: Colors.white,
-                                inactiveTrackColor: Colors.orangeAccent,
-                              ),
-                              Text('自宅'),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    //----------------//e
-                  ],
-                ),
+                  ),
+                  //------------------------------// Map
 
-                Container(
-                  height: 5,
-                  margin: const EdgeInsets.symmetric(vertical: 5),
-                  decoration: BoxDecoration(color: Colors.red[900]),
-                ),
+                  const SizedBox(height: 10),
 
-                /////////////////////////// photo
-                (_isEnlarge)
-                    ? Container()
-                    : Column(
+                  Text(_templeMaps[_utility.year]![0].address),
+                  Text(_templeMaps[_utility.year]![0].station),
+                  Text(distance),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
                         children: [
                           Container(
-                            height: 100,
-                            margin: const EdgeInsets.only(top: 20),
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  margin: const EdgeInsets.only(right: 10),
-                                  width: 70,
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: NetworkImage(
-                                          _templeMaps[_utility.year]![0]
-                                              .photo[index]),
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                );
-                              },
-                              separatorBuilder: (context, index) =>
-                                  const SizedBox(height: 0.2),
-                              itemCount:
-                                  _templeMaps[_utility.year]![0].photo.length,
+                            padding: const EdgeInsets.all(10),
+                            alignment: Alignment.topRight,
+                            child: GestureDetector(
+                              child: const Icon(
+                                Icons.center_focus_strong,
+                                color: Colors.red,
+                              ),
+                              onTap: () => _mapEnlarge(),
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.only(top: 20, right: 10),
+                            padding: const EdgeInsets.all(10),
                             alignment: Alignment.topRight,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                primary: Colors.red[900],
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
+                            child: GestureDetector(
+                              child: const Icon(
+                                Icons.flag,
+                                color: Colors.red,
                               ),
-                              onPressed: () => _goPhotoDisplayScreen(
-                                  data: _templeMaps[_utility.year]![0]),
-                              child: Container(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 30),
-                                child: const Text('Gallery'),
+                              onTap: () => _backFlagPosition(),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            alignment: Alignment.topRight,
+                            child: GestureDetector(
+                              child: const Icon(
+                                Icons.square_foot_outlined,
+                                color: Colors.red,
                               ),
+                              onTap: () => _changeMapType(),
                             ),
                           ),
                         ],
                       ),
+                      //----------------//s
+                      Row(
+                        children: [
+                          (_canDispPolyline)
+                              ? Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      alignment: Alignment.topRight,
+                                      child: GestureDetector(
+                                        child: const Icon(
+                                          Icons.vignette_rounded,
+                                          color: Colors.red,
+                                        ),
+                                        onTap: () =>
+                                            _googleMapController.animateCamera(
+                                          CameraUpdate.newLatLngBounds(
+                                              bounds, 100),
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      alignment: Alignment.topRight,
+                                      child: GestureDetector(
+                                        child: const Icon(
+                                          Icons.stacked_line_chart,
+                                          color: Colors.red,
+                                        ),
+                                        onTap: () => _polylineDisp(),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Container(),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.red[900]!.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: Row(
+                              children: [
+                                Text('実家'),
+                                new Switch(
+                                  value: _isMyHome,
+                                  onChanged: _changeSwitch,
+                                  activeColor: Colors.white,
+                                  activeTrackColor: Colors.orangeAccent,
+                                  inactiveThumbColor: Colors.white,
+                                  inactiveTrackColor: Colors.orangeAccent,
+                                ),
+                                Text('自宅'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      //----------------//e
+                    ],
+                  ),
 
-                /////////////////////////// photo
-              ],
+                  Container(
+                    height: 5,
+                    margin: const EdgeInsets.symmetric(vertical: 5),
+                    decoration: BoxDecoration(color: Colors.red[900]),
+                  ),
+
+                  /////////////////////////// photo
+                  (_isEnlarge)
+                      ? Container()
+                      : Column(
+                          children: [
+                            Container(
+                              height: 100,
+                              margin: const EdgeInsets.only(top: 20),
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    margin: const EdgeInsets.only(right: 10),
+                                    width: 70,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: NetworkImage(
+                                            _templeMaps[_utility.year]![0]
+                                                .photo[index]),
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(height: 0.2),
+                                itemCount:
+                                    _templeMaps[_utility.year]![0].photo.length,
+                              ),
+                            ),
+                            Container(
+                              padding:
+                                  const EdgeInsets.only(top: 20, right: 10),
+                              alignment: Alignment.topRight,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  primary: Colors.red[900],
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                onPressed: () => _goPhotoDisplayScreen(
+                                    data: _templeMaps[_utility.year]![0]),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 30),
+                                  child: const Text('Gallery'),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                  /////////////////////////// photo
+                ],
+              ),
             )
           else
             const Center(
@@ -400,6 +418,13 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
         ],
       ),
     );
+  }
+
+  ///
+  void _changeMapType() {
+    setState(() {
+      _mapType = (_mapType == 1) ? 2 : 1;
+    });
   }
 
   ///
