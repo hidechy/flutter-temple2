@@ -57,6 +57,9 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
 
   int _mapType = 1;
 
+//  Map<String, Map> _latLngMap = {};
+  Map<String, dynamic> _latLngMap = {};
+
   ///
   @override
   void dispose() {
@@ -81,6 +84,13 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
         await post(Uri.parse(url), headers: headers, body: body);
     final temple = templeFromJson(response.body);
     _templeMaps = temple.data;
+    ///////////////////////////////////
+
+    ///////////////////////////////////
+    String url2 = "http://toyohide.work/BrainLog/api/getTempleLatLng";
+    Response response2 = await post(Uri.parse(url2), headers: headers);
+    Map tll = jsonDecode(response2.body);
+    _latLngMap = tll['data'];
     ///////////////////////////////////
 
     origin = '35.7102009,139.9490672';
@@ -171,245 +181,256 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         ),
       );
+
+      if (_templeMaps[_utility.year]![0].memo != '') {
+        _addWithTempleMarkers(memo: _templeMaps[_utility.year]![0].memo);
+      }
     }
 
     Size size = MediaQuery.of(context).size;
+
+    var dispWith = '';
+    if (_templeMaps[_utility.year] != null) {
+      dispWith = '(With) ${_templeMaps[_utility.year]![0].memo}';
+    }
 
     return Scaffold(
       body: Stack(
         children: [
           _utility.getBackGround(),
           if (_isLoading)
-            SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 40),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    alignment: Alignment.topRight,
-                    child: GestureDetector(
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.red,
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 40),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  alignment: Alignment.topRight,
+                  child: GestureDetector(
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.red,
                     ),
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
                   ),
-                  Text(widget.date),
-                  Text(
-                    _templeMaps[_utility.year]![0].temple,
-                    style: const TextStyle(fontSize: 24),
-                  ),
-                  (_templeMaps[_utility.year]![0].gohonzon != "")
-                      ? Text(_templeMaps[_utility.year]![0].gohonzon)
-                      : Container(),
-                  (_templeMaps[_utility.year]![0].memo != "")
-                      ? Text('(With) ${_templeMaps[_utility.year]![0].memo}')
-                      : Container(),
-                  Container(
-                    height: 5,
-                    margin: const EdgeInsets.symmetric(vertical: 5),
-                    decoration: BoxDecoration(color: Colors.red[900]),
-                  ),
+                ),
+                Text(widget.date),
+                Text(
+                  _templeMaps[_utility.year]![0].temple,
+                  style: const TextStyle(fontSize: 24),
+                ),
+                (_templeMaps[_utility.year]![0].gohonzon != "")
+                    ? Text(_templeMaps[_utility.year]![0].gohonzon)
+                    : Container(),
+                (dispWith != "")
+                    ? Text(
+                        (dispWith.length < 26)
+                            ? dispWith
+                            : '${dispWith.substring(0, 26)}...',
+                        maxLines: 1,
+                      )
+                    : Container(),
+                Container(
+                  height: 5,
+                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  decoration: BoxDecoration(color: Colors.red[900]),
+                ),
 
-                  //------------------------------// Map
-                  SizedBox(
-                    height: (_isEnlarge) ? (size.height - 350) : 220,
-                    child: GoogleMap(
-                      mapType:
-                          (_mapType == 1) ? MapType.normal : MapType.satellite,
-                      onMapCreated: (controller) =>
-                          _googleMapController = controller,
-                      markers: _markers,
-                      initialCameraPosition: _initialCameraPosition,
-                      polylines: {
-                        if (_dispPolyline)
-                          Polyline(
-                            polylineId: const PolylineId('overview_polyline'),
-                            color: Colors.redAccent,
-                            width: 5,
-                            points: polylinePoints
-                                .map((e) => LatLng(e.latitude, e.longitude))
-                                .toList(),
-                          ),
-                      },
-                    ),
-                  ),
-                  //------------------------------// Map
-
-                  const SizedBox(height: 10),
-
-                  Text(_templeMaps[_utility.year]![0].address),
-                  Text(_templeMaps[_utility.year]![0].station),
-                  Text(distance),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            alignment: Alignment.topRight,
-                            child: GestureDetector(
-                              child: const Icon(
-                                Icons.center_focus_strong,
-                                color: Colors.red,
-                              ),
-                              onTap: () => _mapEnlarge(),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            alignment: Alignment.topRight,
-                            child: GestureDetector(
-                              child: const Icon(
-                                Icons.flag,
-                                color: Colors.red,
-                              ),
-                              onTap: () => _backFlagPosition(),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            alignment: Alignment.topRight,
-                            child: GestureDetector(
-                              child: const Icon(
-                                Icons.square_foot_outlined,
-                                color: Colors.red,
-                              ),
-                              onTap: () => _changeMapType(),
-                            ),
-                          ),
-                        ],
-                      ),
-                      //----------------//s
-                      Row(
-                        children: [
-                          (_canDispPolyline)
-                              ? Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(10),
-                                      alignment: Alignment.topRight,
-                                      child: GestureDetector(
-                                        child: const Icon(
-                                          Icons.vignette_rounded,
-                                          color: Colors.red,
-                                        ),
-                                        onTap: () =>
-                                            _googleMapController.animateCamera(
-                                          CameraUpdate.newLatLngBounds(
-                                              bounds, 100),
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.all(10),
-                                      alignment: Alignment.topRight,
-                                      child: GestureDetector(
-                                        child: const Icon(
-                                          Icons.stacked_line_chart,
-                                          color: Colors.red,
-                                        ),
-                                        onTap: () => _polylineDisp(),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : Container(),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.red[900]!.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: Row(
-                              children: [
-                                Text('実家'),
-                                new Switch(
-                                  value: _isMyHome,
-                                  onChanged: _changeSwitch,
-                                  activeColor: Colors.white,
-                                  activeTrackColor: Colors.orangeAccent,
-                                  inactiveThumbColor: Colors.white,
-                                  inactiveTrackColor: Colors.orangeAccent,
-                                ),
-                                Text('自宅'),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      //----------------//e
-                    ],
-                  ),
-
-                  Container(
-                    height: 5,
-                    margin: const EdgeInsets.symmetric(vertical: 5),
-                    decoration: BoxDecoration(color: Colors.red[900]),
-                  ),
-
-                  /////////////////////////// photo
-                  (_isEnlarge)
-                      ? Container()
-                      : Column(
-                          children: [
-                            Container(
-                              height: 100,
-                              margin: const EdgeInsets.only(top: 20),
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    margin: const EdgeInsets.only(right: 10),
-                                    width: 70,
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: NetworkImage(
-                                            _templeMaps[_utility.year]![0]
-                                                .photo[index]),
-                                        fit: BoxFit.fill,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                separatorBuilder: (context, index) =>
-                                    const SizedBox(height: 0.2),
-                                itemCount:
-                                    _templeMaps[_utility.year]![0].photo.length,
-                              ),
-                            ),
-                            Container(
-                              padding:
-                                  const EdgeInsets.only(top: 20, right: 10),
-                              alignment: Alignment.topRight,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.red[900],
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                onPressed: () => _goPhotoDisplayScreen(
-                                    data: _templeMaps[_utility.year]![0]),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 30),
-                                  child: const Text('Gallery'),
-                                ),
-                              ),
-                            ),
-                          ],
+                //------------------------------// Map
+                SizedBox(
+                  height: (_isEnlarge) ? (size.height - 350) : 220,
+                  child: GoogleMap(
+                    mapType:
+                        (_mapType == 1) ? MapType.normal : MapType.satellite,
+                    onMapCreated: (controller) =>
+                        _googleMapController = controller,
+                    markers: _markers,
+                    initialCameraPosition: _initialCameraPosition,
+                    polylines: {
+                      if (_dispPolyline)
+                        Polyline(
+                          polylineId: const PolylineId('overview_polyline'),
+                          color: Colors.redAccent,
+                          width: 5,
+                          points: polylinePoints
+                              .map((e) => LatLng(e.latitude, e.longitude))
+                              .toList(),
                         ),
+                    },
+                  ),
+                ),
+                //------------------------------// Map
 
-                  /////////////////////////// photo
-                ],
-              ),
+                const SizedBox(height: 10),
+
+                Text(_templeMaps[_utility.year]![0].address),
+                Text(_templeMaps[_utility.year]![0].station),
+                Text(distance),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          alignment: Alignment.topRight,
+                          child: GestureDetector(
+                            child: const Icon(
+                              Icons.center_focus_strong,
+                              color: Colors.red,
+                            ),
+                            onTap: () => _mapEnlarge(),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          alignment: Alignment.topRight,
+                          child: GestureDetector(
+                            child: const Icon(
+                              Icons.flag,
+                              color: Colors.red,
+                            ),
+                            onTap: () => _backFlagPosition(),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          alignment: Alignment.topRight,
+                          child: GestureDetector(
+                            child: const Icon(
+                              Icons.square_foot_outlined,
+                              color: Colors.red,
+                            ),
+                            onTap: () => _changeMapType(),
+                          ),
+                        ),
+                      ],
+                    ),
+                    //----------------//s
+                    Row(
+                      children: [
+                        (_canDispPolyline)
+                            ? Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    alignment: Alignment.topRight,
+                                    child: GestureDetector(
+                                      child: const Icon(
+                                        Icons.vignette_rounded,
+                                        color: Colors.red,
+                                      ),
+                                      onTap: () =>
+                                          _googleMapController.animateCamera(
+                                        CameraUpdate.newLatLngBounds(
+                                            bounds, 100),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    alignment: Alignment.topRight,
+                                    child: GestureDetector(
+                                      child: const Icon(
+                                        Icons.stacked_line_chart,
+                                        color: Colors.red,
+                                      ),
+                                      onTap: () => _polylineDisp(),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Container(),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.red[900]!.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            children: [
+                              const Text('実家'),
+                              Switch(
+                                value: _isMyHome,
+                                onChanged: _changeSwitch,
+                                activeColor: Colors.white,
+                                activeTrackColor: Colors.orangeAccent,
+                                inactiveThumbColor: Colors.white,
+                                inactiveTrackColor: Colors.orangeAccent,
+                              ),
+                              const Text('自宅'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    //----------------//e
+                  ],
+                ),
+
+                Container(
+                  height: 5,
+                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  decoration: BoxDecoration(color: Colors.red[900]),
+                ),
+
+                /////////////////////////// photo
+                (_isEnlarge)
+                    ? Container()
+                    : Column(
+                        children: [
+                          Container(
+                            height: 100,
+                            margin: const EdgeInsets.only(top: 20),
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  margin: const EdgeInsets.only(right: 10),
+                                  width: 70,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: NetworkImage(
+                                          _templeMaps[_utility.year]![0]
+                                              .photo[index]),
+                                      fit: BoxFit.fill,
+                                    ),
+                                  ),
+                                );
+                              },
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(height: 0.2),
+                              itemCount:
+                                  _templeMaps[_utility.year]![0].photo.length,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.only(top: 20, right: 10),
+                            alignment: Alignment.topRight,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.red[900],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              onPressed: () => _goPhotoDisplayScreen(
+                                  data: _templeMaps[_utility.year]![0]),
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 30),
+                                child: const Text('Gallery'),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                /////////////////////////// photo
+              ],
             )
           else
             const Center(
@@ -467,6 +488,29 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
     setState(() {
       _dispPolyline = !_dispPolyline;
     });
+  }
+
+  ///
+  void _addWithTempleMarkers({required String memo}) {
+    var ex_memo = memo.split('、');
+    for (var i = 0; i < ex_memo.length; i++) {
+      var _latLng_ = LatLng(
+        double.parse(_latLngMap[ex_memo[i]][0]['lat']),
+        double.parse(_latLngMap[ex_memo[i]][0]['lng']),
+      );
+
+      _markers.add(
+        Marker(
+          markerId: MarkerId('memo${i}'),
+          position: _latLng_,
+          infoWindow: InfoWindow(
+            title: '${ex_memo[i]}',
+            snippet: '${_latLngMap[ex_memo[i]][0]['address']}',
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
+        ),
+      );
+    }
   }
 
   //////////////////////////////////

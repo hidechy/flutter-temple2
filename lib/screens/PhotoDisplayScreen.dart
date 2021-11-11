@@ -70,11 +70,11 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
                 widget.data.temple,
                 style: const TextStyle(fontSize: 24),
               ),
-              (widget.data.gohonzon != "")
-                  ? Text(widget.data.gohonzon)
-                  : Container(),
+              // (widget.data.gohonzon != "")
+              //     ? Text(widget.data.gohonzon)
+              //     : Container(),
               (widget.data.memo != "")
-                  ? Text('With. ${widget.data.memo}')
+                  ? Text('(With) ${widget.data.memo}')
                   : Container(),
               Container(
                 height: 5,
