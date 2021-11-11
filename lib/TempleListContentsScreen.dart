@@ -146,63 +146,70 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
                   margin: const EdgeInsets.symmetric(vertical: 5),
                   decoration: BoxDecoration(color: Colors.red[900]),
                 ),
-                Expanded(
-                  child: (_isLoading)
-                      ? MediaQuery.removePadding(
-                          removeTop: true,
-                          context: context,
-                          child: ListView.separated(
-                            itemBuilder: (context, index) {
-                              var _listDate =
-                                  '${_shirineList![index].date.year.toString().padLeft(4, '0')}-${_shirineList[index].date.month.toString().padLeft(2, '0')}-${_shirineList[index].date.day.toString().padLeft(2, '0')}';
-
-                              return Card(
-                                color: Colors.black.withOpacity(0.3),
-                                child: ListTile(
-                                  leading: SizedBox(
-                                    width: 40,
-                                    child: FadeInImage.assetNetwork(
-                                      placeholder: 'assets/images/no_image.png',
-                                      image: _shirineList[index].thumbnail,
-                                    ),
-                                  ),
-                                  title: DefaultTextStyle(
-                                    style: const TextStyle(fontSize: 12),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(_listDate),
-                                        Text(_shirineList[index].temple),
-                                      ],
-                                    ),
-                                  ),
-                                  trailing: GestureDetector(
-                                    onTap: () => _goTempleDetailDisplayScreen(
-                                        date: _listDate),
-                                    child: const Icon(
-                                      Icons.call_made,
-                                      color: Colors.redAccent,
-                                      size: 20,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(height: 0.2),
-                            itemCount: _shirineList!.length,
-                          ),
-                        )
-                      : const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                ),
+                _templeList(context, _shirineList),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  ///
+  Widget _templeList(BuildContext context, _shirineList) {
+    return Expanded(
+      child: (_isLoading)
+          ? MediaQuery.removePadding(
+              removeTop: true,
+              context: context,
+              child: ListView.separated(
+                itemBuilder: (context, index) {
+                  var _listDate =
+                      '${_shirineList![index].date.year.toString().padLeft(4, '0')}-${_shirineList[index].date.month.toString().padLeft(2, '0')}-${_shirineList[index].date.day.toString().padLeft(2, '0')}';
+
+                  return Card(
+                    color: Colors.black.withOpacity(0.3),
+                    child: ListTile(
+                      leading: SizedBox(
+                        width: 40,
+                        child: FadeInImage.assetNetwork(
+                          placeholder: 'assets/images/no_image.png',
+                          image: _shirineList[index].thumbnail,
+                        ),
+                      ),
+                      title: DefaultTextStyle(
+                        style: const TextStyle(fontSize: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(_listDate),
+                            Text(_shirineList[index].temple),
+                            (_shirineList[index].memo != '')
+                                ? Text('(With) ${_shirineList[index].memo}')
+                                : Container(),
+                          ],
+                        ),
+                      ),
+                      trailing: GestureDetector(
+                        onTap: () =>
+                            _goTempleDetailDisplayScreen(date: _listDate),
+                        child: const Icon(
+                          Icons.call_made,
+                          color: Colors.redAccent,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 0.2),
+                itemCount: _shirineList!.length,
+              ),
+            )
+          : const Center(
+              child: CircularProgressIndicator(),
+            ),
     );
   }
 

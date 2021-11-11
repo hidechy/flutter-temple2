@@ -177,7 +177,10 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
         Marker(
           markerId: const MarkerId('distination'),
           position: _latLng,
-          infoWindow: InfoWindow(title: _templeMaps[_utility.year]![0].temple),
+          infoWindow: InfoWindow(
+            title: _templeMaps[_utility.year]![0].temple,
+            snippet: _templeMaps[_utility.year]![0].address,
+          ),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         ),
       );
@@ -492,20 +495,20 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
 
   ///
   void _addWithTempleMarkers({required String memo}) {
-    var ex_memo = memo.split('、');
-    for (var i = 0; i < ex_memo.length; i++) {
+    var exMemo = memo.split('、');
+    for (var i = 0; i < exMemo.length; i++) {
       var _latLng_ = LatLng(
-        double.parse(_latLngMap[ex_memo[i]][0]['lat']),
-        double.parse(_latLngMap[ex_memo[i]][0]['lng']),
+        double.parse(_latLngMap[exMemo[i]][0]['lat']),
+        double.parse(_latLngMap[exMemo[i]][0]['lng']),
       );
 
       _markers.add(
         Marker(
-          markerId: MarkerId('memo${i}'),
+          markerId: MarkerId('memo$i'),
           position: _latLng_,
           infoWindow: InfoWindow(
-            title: '${ex_memo[i]}',
-            snippet: '${_latLngMap[ex_memo[i]][0]['address']}',
+            title: exMemo[i],
+            snippet: '${_latLngMap[exMemo[i]][0]['address']}',
           ),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
         ),
