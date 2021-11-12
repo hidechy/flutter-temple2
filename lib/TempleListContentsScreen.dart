@@ -14,6 +14,8 @@ import 'utility/Utility.dart';
 
 import 'screens/TempleDetailDisplayScreen.dart';
 
+import 'controllers/TempleAnimationController.dart';
+
 class TempleListContentsScreen extends StatefulWidget {
   final String year;
 
@@ -40,6 +42,8 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
   final Set<Marker> _markerSets = {};
 
   Map<String, dynamic> _latLngMap = {};
+
+  final TempleAnimationController _controller = TempleAnimationController();
 
   /// 初期動作
   @override
@@ -117,54 +121,72 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
         body: Stack(
           children: [
             _utility.getBackGround(),
-            Column(
-              children: [
-                const SizedBox(height: 40),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (context, snapshot) {
+                return Column(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      child: GestureDetector(
-                        child: const Icon(Icons.menu),
-                        onTap: () {
-                          if (isDrawerOpen) {
-                            setState(() {
-                              xOffset = 0;
-                              yOffset = 0;
-                              isDrawerOpen = false;
-                            });
-                          } else {
-                            setState(() {
-                              xOffset = (size.width - 200);
-                              yOffset = (size.height / 10);
-                              isDrawerOpen = true;
-                            });
-                          }
-                        },
-                      ),
-                    ),
+                    const SizedBox(height: 40),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        IconButton(
-                          onPressed: () => _goYearyTempleDisplayScreen(),
-                          icon: const Icon(Icons.map),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          child: GestureDetector(
+                            onTap: () {
+                              _controller.updateDrawerOpen();
+
+                              if (isDrawerOpen) {
+                                setState(() {
+                                  xOffset = 0;
+                                  yOffset = 0;
+                                  isDrawerOpen = false;
+                                });
+                              } else {
+                                setState(() {
+                                  xOffset = (size.width - 200);
+                                  yOffset = (size.height / 10);
+                                  isDrawerOpen = true;
+                                });
+                              }
+                            },
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 3000),
+                              switchInCurve: Curves.easeInOutBack,
+                              transitionBuilder: (child, animation) =>
+                                  ScaleTransition(
+                                      scale: animation, child: child),
+                              child: (_controller.isDrawerOpen)
+                                  ? const Icon(Icons.arrow_back,
+                                      size: 40, key: ValueKey("close"))
+                                  : const Icon(Icons.arrow_forward,
+                                      size: 40, key: ValueKey("open")),
+                            ),
+                          ),
                         ),
-                        Text(
-                          widget.year,
-                          style: const TextStyle(fontSize: 20),
+                        Row(
+                          children: [
+                            IconButton(
+                              onPressed: () => _goYearyTempleDisplayScreen(),
+                              icon: const Icon(Icons.map),
+                            ),
+                            Text(
+                              widget.year,
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                          ],
                         ),
                       ],
                     ),
+                    Container(
+                      height: 5,
+                      margin: const EdgeInsets.only(bottom: 5),
+                      decoration: BoxDecoration(color: Colors.red[900]),
+                    ),
+                    _templeList(context, _shirineList),
                   ],
-                ),
-                Container(
-                  height: 5,
-                  margin: const EdgeInsets.symmetric(vertical: 5),
-                  decoration: BoxDecoration(color: Colors.red[900]),
-                ),
-                _templeList(context, _shirineList),
-              ],
+                );
+              },
             ),
           ],
         ),
