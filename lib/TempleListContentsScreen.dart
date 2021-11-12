@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
 
 import 'dart:math';
+import 'dart:convert';
 
 import 'models/Temple.dart';
 
@@ -38,6 +39,8 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
 
   final Set<Marker> _markerSets = {};
 
+  Map<String, dynamic> _latLngMap = {};
+
   /// 初期動作
   @override
   void initState() {
@@ -48,6 +51,13 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
 
   /// 初期データ作成
   void _makeDefaultDisplayData() async {
+    ///////////////////////////////////
+    String url2 = "http://toyohide.work/BrainLog/api/getTempleLatLng";
+    Response response2 = await post(Uri.parse(url2), headers: headers);
+    Map tll = jsonDecode(response2.body);
+    _latLngMap = tll['data'];
+    ///////////////////////////////////
+
     ///////////////////////////////////
     String url = "http://toyohide.work/BrainLog/api/getAllTemple";
     Response response = await post(Uri.parse(url), headers: headers);
@@ -64,9 +74,16 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
             double.parse(_templeMaps[widget.year]![i].lat),
             double.parse(_templeMaps[widget.year]![i].lng),
           ),
-          infoWindow: InfoWindow(title: _templeMaps[widget.year]![i].temple),
+          infoWindow: InfoWindow(
+            title: _templeMaps[widget.year]![i].temple,
+            snippet: _templeMaps[widget.year]![i].address,
+          ),
         ),
       );
+
+      if (_templeMaps[widget.year]![i].memo != '') {
+        _addWithTempleMarkers(memo: _templeMaps[widget.year]![i].memo);
+      }
     }
     //--------------------------// marker
 
@@ -211,6 +228,32 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
               child: CircularProgressIndicator(),
             ),
     );
+  }
+
+  ///
+  void _addWithTempleMarkers({required String memo}) {
+    var exMemo = memo.split('、');
+    for (var i = 0; i < exMemo.length; i++) {
+      if (_latLngMap[exMemo[i]] != null) {
+        var _latLng_ = LatLng(
+          double.parse(_latLngMap[exMemo[i]][0]['lat']),
+          double.parse(_latLngMap[exMemo[i]][0]['lng']),
+        );
+
+        _markerSets.add(
+          Marker(
+            markerId: MarkerId('memo$i'),
+            position: _latLng_,
+            infoWindow: InfoWindow(
+              title: exMemo[i],
+              snippet: '${_latLngMap[exMemo[i]][0]['address']}',
+            ),
+            icon:
+                BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
+          ),
+        );
+      }
+    }
   }
 
   ///////////////////////////////////////

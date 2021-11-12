@@ -57,7 +57,6 @@ class _TempleDetailDisplayScreenState extends State<TempleDetailDisplayScreen> {
 
   int _mapType = 1;
 
-//  Map<String, Map> _latLngMap = {};
   Map<String, dynamic> _latLngMap = {};
 
   ///
