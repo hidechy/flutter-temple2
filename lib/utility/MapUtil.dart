@@ -1,4 +1,4 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, avoid_classes_with_only_static_members
 
 class MapUtil {
   static String mapStyle = '''

@@ -2,15 +2,14 @@
 
 import 'package:flutter/material.dart';
 
-import 'utility/Utility.dart';
-
 import 'TempleListContentsScreen.dart';
 import 'TempleListMenuScreen.dart';
+import 'utility/Utility.dart';
 
 class TempleListScreen extends StatefulWidget {
-  final String? year;
-
   const TempleListScreen({this.year});
+
+  final String? year;
 
   @override
   _TempleListScreenState createState() => _TempleListScreenState();
@@ -23,7 +22,7 @@ class _TempleListScreenState extends State<TempleListScreen> {
   @override
   Widget build(BuildContext context) {
     _utility.makeYMDYData(DateTime.now().toString());
-    String _selectedYear =
+    final _selectedYear =
         (widget.year == null) ? _utility.year : '${widget.year}';
 
     return Scaffold(

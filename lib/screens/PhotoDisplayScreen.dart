@@ -1,19 +1,17 @@
 // ignore_for_file: file_names, prefer_const_constructors_in_immutables
 
-import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/material.dart';
 
 import '../models/Temple.dart';
-
 import '../utility/Utility.dart';
 
 class PhotoDisplayScreen extends StatefulWidget {
-  final Shrine data;
-  final String firstPhotoTime;
-
   PhotoDisplayScreen(
       {Key? key, required this.data, required this.firstPhotoTime})
       : super(key: key);
+  final Shrine data;
+  final String firstPhotoTime;
 
   @override
   _PhotoDisplayScreenState createState() => _PhotoDisplayScreenState();
@@ -24,7 +22,7 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
 
   int _current = 0;
 
-  String _photoTime = "";
+  String _photoTime = '';
 
   late Size size;
 
@@ -41,7 +39,7 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
 
-    var _listDate =
+    final _listDate =
         '${widget.data.date.year.toString().padLeft(4, '0')}-${widget.data.date.month.toString().padLeft(2, '0')}-${widget.data.date.day.toString().padLeft(2, '0')}';
 
     return Scaffold(
@@ -73,7 +71,7 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
               // (widget.data.gohonzon != "")
               //     ? Text(widget.data.gohonzon)
               //     : Container(),
-              (widget.data.memo != "")
+              (widget.data.memo != '')
                   ? Text('(With) ${widget.data.memo}')
                   : Container(),
               Container(
@@ -90,8 +88,7 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
               ),
               CarouselSlider(
                 options: CarouselOptions(
-                  height: 470.0,
-                  initialPage: 0,
+                  height: 470,
                   enlargeCenterPage: true,
                   onPageChanged: (index, _) {
                     setState(
@@ -135,9 +132,9 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
 
   ///
   Widget _makeIndicator() {
-    List<Widget> _list = [];
+    final _list = <Widget>[];
 
-    var _photoNum = widget.data.photo.length;
+    final _photoNum = widget.data.photo.length;
 
     for (var i = 0; i < _photoNum; i++) {
       _list.add(
@@ -157,8 +154,8 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
       children: [
         Expanded(child: Container()),
         Container(
-          width: (size.width / 10 * 8),
-          height: (size.height / 15),
+          width: size.width / 10 * 8,
+          height: size.height / 15,
           alignment: Alignment.topRight,
           child: Wrap(children: _list),
         ),

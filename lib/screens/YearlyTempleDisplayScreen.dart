@@ -6,12 +6,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../utility/Utility.dart';
 
 class YearlyTempleDisplayScreen extends StatefulWidget {
-  final String year;
-  final Set<Marker> marker;
-
   YearlyTempleDisplayScreen(
       {Key? key, required this.year, required this.marker})
       : super(key: key);
+  final String year;
+  final Set<Marker> marker;
 
   @override
   _YearlyTempleDisplayScreenState createState() =>
@@ -24,12 +23,11 @@ class _YearlyTempleDisplayScreenState extends State<YearlyTempleDisplayScreen> {
   ///
   @override
   Widget build(BuildContext context) {
-    LatLng _latLng = const LatLng(35.7102009, 139.9490672);
+    const _latLng = LatLng(35.7102009, 139.9490672);
 
-    CameraPosition _initialCameraPosition =
-        CameraPosition(target: _latLng, zoom: 11);
+    const _initialCameraPosition = CameraPosition(target: _latLng, zoom: 11);
 
-    var itemCount = widget.marker.length;
+    final itemCount = widget.marker.length;
 
     return Scaffold(
       body: Stack(

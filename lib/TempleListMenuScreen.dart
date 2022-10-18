@@ -3,16 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 
+import 'TempleListScreen.dart';
 import 'models/Temple.dart';
-
 import 'utility/Utility.dart';
 
-import 'TempleListScreen.dart';
-
 class TempleListMenuScreen extends StatefulWidget {
-  final String year;
-
   TempleListMenuScreen({Key? key, required this.year}) : super(key: key);
+  final String year;
 
   @override
   _TempleListMenuScreenState createState() => _TempleListMenuScreenState();
@@ -36,17 +33,17 @@ class _TempleListMenuScreenState extends State<TempleListMenuScreen> {
   }
 
   /// 初期データ作成
-  void _makeDefaultDisplayData() async {
+  Future<void> _makeDefaultDisplayData() async {
     _utility.makeYMDYData(DateTime.now().toString());
-    String _maxYear = _utility.year;
+    final _maxYear = _utility.year;
 
-    for (int i = int.parse(_maxYear); i >= 2014; i--) {
+    for (var i = int.parse(_maxYear); i >= 2014; i--) {
       _yearsList.add(i.toString());
     }
 
     ///////////////////////////////////
-    String url = "http://toyohide.work/BrainLog/api/getAllTemple";
-    Response response = await post(Uri.parse(url), headers: headers);
+    const url = 'http://toyohide.work/BrainLog/api/getAllTemple';
+    final response = await post(Uri.parse(url), headers: headers);
     final temple = templeFromJson(response.body);
     _templeMaps = temple.data;
     ///////////////////////////////////
@@ -60,47 +57,54 @@ class _TempleListMenuScreenState extends State<TempleListMenuScreen> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: Column(
+        body: Stack(
           children: [
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 10),
-              alignment: Alignment.topLeft,
-              child: const Text(
-                'Year Select',
-                style: TextStyle(fontSize: 20),
-              ),
-            ),
-            Expanded(
-              child: ListView.separated(
-                itemBuilder: (context, index) {
-                  var _shirineCount = (_templeMaps[_yearsList[index]] != null)
-                      ? _templeMaps[_yearsList[index]]!.length
-                      : 0;
+            _utility.getBackGround(),
+            Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  alignment: Alignment.topLeft,
+                  child: const Text(
+                    'Year Select',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+                Expanded(
+                  child: ListView.separated(
+                    itemBuilder: (context, index) {
+                      final _shirineCount =
+                          (_templeMaps[_yearsList[index]] != null)
+                              ? _templeMaps[_yearsList[index]]!.length
+                              : 0;
 
-                  return Card(
-                    color: (_yearsList[index] == widget.year)
-                        ? Colors.red[900]
-                        : Colors.white.withOpacity(0.2),
-                    child: ListTile(
-                      title: Row(
-                        children: [
-                          Text(_yearsList[index],
-                              style: const TextStyle(fontSize: 12)),
-                          const SizedBox(width: 10),
-                          Text(
-                            '（$_shirineCount）',
-                            style: const TextStyle(fontSize: 12),
+                      return Card(
+                        color: (_yearsList[index] == widget.year)
+                            ? Colors.red[900]
+                            : Colors.white.withOpacity(0.2),
+                        child: ListTile(
+                          title: Row(
+                            children: [
+                              Text(_yearsList[index],
+                                  style: const TextStyle(fontSize: 12)),
+                              const SizedBox(width: 10),
+                              Text(
+                                '（$_shirineCount）',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      onTap: () => _goTempleListScreen(year: _yearsList[index]),
-                    ),
-                  );
-                },
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 0.2),
-                itemCount: _yearsList.length,
-              ),
+                          onTap: () =>
+                              _goTempleListScreen(year: _yearsList[index]),
+                        ),
+                      );
+                    },
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 0.2),
+                    itemCount: _yearsList.length,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

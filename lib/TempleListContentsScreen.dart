@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, prefer_const_constructors_in_immutables
+// ignore_for_file: file_names, prefer_const_constructors_in_immutables, directives_ordering, avoid_dynamic_calls, inference_failure_on_untyped_parameter
 
 import 'package:flutter/material.dart';
 import 'package:flutter_temple2/screens/YearlyTempleDisplayScreen.dart';
@@ -17,9 +17,8 @@ import 'screens/TempleDetailDisplayScreen.dart';
 import 'controllers/TempleAnimationController.dart';
 
 class TempleListContentsScreen extends StatefulWidget {
-  final String year;
-
   TempleListContentsScreen({Key? key, required this.year}) : super(key: key);
+  final String year;
 
   @override
   _TempleListContentsScreenState createState() =>
@@ -41,7 +40,7 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
 
   final Set<Marker> _markerSets = {};
 
-  Map<String, dynamic> _latLngMap = {};
+  dynamic _latLngMap;
 
   final TempleAnimationController _controller = TempleAnimationController();
 
@@ -54,17 +53,17 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
   }
 
   /// 初期データ作成
-  void _makeDefaultDisplayData() async {
+  Future<void> _makeDefaultDisplayData() async {
     ///////////////////////////////////
-    String url2 = "http://toyohide.work/BrainLog/api/getTempleLatLng";
-    Response response2 = await post(Uri.parse(url2), headers: headers);
-    Map tll = jsonDecode(response2.body);
+    const url2 = 'http://toyohide.work/BrainLog/api/getTempleLatLng';
+    final response2 = await post(Uri.parse(url2), headers: headers);
+    final tll = jsonDecode(response2.body);
     _latLngMap = tll['data'];
     ///////////////////////////////////
 
     ///////////////////////////////////
-    String url = "http://toyohide.work/BrainLog/api/getAllTemple";
-    Response response = await post(Uri.parse(url), headers: headers);
+    const url = 'http://toyohide.work/BrainLog/api/getAllTemple';
+    final response = await post(Uri.parse(url), headers: headers);
     final temple = templeFromJson(response.body);
     _templeMaps = temple.data;
     ///////////////////////////////////
@@ -75,8 +74,8 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
         Marker(
           markerId: MarkerId('id-$i'),
           position: LatLng(
-            double.parse(_templeMaps[widget.year]![i].lat),
-            double.parse(_templeMaps[widget.year]![i].lng),
+            double.parse(_templeMaps[widget.year]![i].lat.toString()),
+            double.parse(_templeMaps[widget.year]![i].lng.toString()),
           ),
           infoWindow: InfoWindow(
             title: _templeMaps[widget.year]![i].temple,
@@ -99,9 +98,9 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
   ///
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    final size = MediaQuery.of(context).size;
 
-    List<Shrine>? _shirineList = _templeMaps[widget.year];
+    final _shirineList = _templeMaps[widget.year];
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 2000),
@@ -109,13 +108,12 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
         xOffset,
         yOffset,
         0,
-      )..rotateZ((isDrawerOpen) ? (pi / 20) : 0),
+      )..rotateZ(isDrawerOpen ? (pi / 60) : 0),
       curve: Curves.elasticIn,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: (isDrawerOpen)
-            ? BorderRadius.circular(40)
-            : BorderRadius.circular(0),
+        borderRadius:
+            isDrawerOpen ? BorderRadius.circular(40) : BorderRadius.circular(0),
       ),
       child: Scaffold(
         body: Stack(
@@ -144,8 +142,8 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
                                 });
                               } else {
                                 setState(() {
-                                  xOffset = (size.width - 200);
-                                  yOffset = (size.height / 10);
+                                  xOffset = size.width - 200;
+                                  yOffset = size.height / 10;
                                   isDrawerOpen = true;
                                 });
                               }
@@ -158,16 +156,16 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
                                       scale: animation, child: child),
                               child: (_controller.isDrawerOpen)
                                   ? const Icon(Icons.arrow_back,
-                                      size: 40, key: ValueKey("close"))
+                                      size: 40, key: ValueKey('close'))
                                   : const Icon(Icons.arrow_forward,
-                                      size: 40, key: ValueKey("open")),
+                                      size: 40, key: ValueKey('open')),
                             ),
                           ),
                         ),
                         Row(
                           children: [
                             IconButton(
-                              onPressed: () => _goYearyTempleDisplayScreen(),
+                              onPressed: _goYearyTempleDisplayScreen,
                               icon: const Icon(Icons.map),
                             ),
                             Text(
@@ -197,13 +195,13 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
   ///
   Widget _templeList(BuildContext context, _shirineList) {
     return Expanded(
-      child: (_isLoading)
+      child: _isLoading
           ? MediaQuery.removePadding(
               removeTop: true,
               context: context,
               child: ListView.separated(
                 itemBuilder: (context, index) {
-                  var _listDate =
+                  final _listDate =
                       '${_shirineList![index].date.year.toString().padLeft(4, '0')}-${_shirineList[index].date.month.toString().padLeft(2, '0')}-${_shirineList[index].date.day.toString().padLeft(2, '0')}';
 
                   return Card(
@@ -213,7 +211,7 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
                         width: 40,
                         child: FadeInImage.assetNetwork(
                           placeholder: 'assets/images/no_image.png',
-                          image: _shirineList[index].thumbnail,
+                          image: _shirineList[index].thumbnail.toString(),
                         ),
                       ),
                       title: DefaultTextStyle(
@@ -222,7 +220,7 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(_listDate),
-                            Text(_shirineList[index].temple),
+                            Text(_shirineList[index].temple.toString()),
                             (_shirineList[index].memo != '')
                                 ? Text('(With) ${_shirineList[index].memo}')
                                 : Container(),
@@ -243,7 +241,7 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
                 },
                 separatorBuilder: (context, index) =>
                     const SizedBox(height: 0.2),
-                itemCount: _shirineList!.length,
+                itemCount: int.parse(_shirineList!.length.toString()),
               ),
             )
           : const Center(
@@ -254,12 +252,12 @@ class _TempleListContentsScreenState extends State<TempleListContentsScreen> {
 
   ///
   void _addWithTempleMarkers({required String memo}) {
-    var exMemo = memo.split('、');
+    final exMemo = memo.split('、');
     for (var i = 0; i < exMemo.length; i++) {
       if (_latLngMap[exMemo[i]] != null) {
-        var _latLng_ = LatLng(
-          double.parse(_latLngMap[exMemo[i]][0]['lat']),
-          double.parse(_latLngMap[exMemo[i]][0]['lng']),
+        final _latLng_ = LatLng(
+          double.parse(_latLngMap[exMemo[i]][0]['lat'].toString()),
+          double.parse(_latLngMap[exMemo[i]][0]['lng'].toString()),
         );
 
         _markerSets.add(
