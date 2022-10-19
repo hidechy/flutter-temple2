@@ -1,6 +1,7 @@
 // ignore_for_file: file_names, prefer_const_constructors_in_immutables
 
 import 'package:flutter/material.dart';
+import 'package:flutter_temple2/screens/temple_search_screen.dart';
 import 'package:http/http.dart';
 
 import 'TempleListScreen.dart';
@@ -61,7 +62,19 @@ class _TempleListMenuScreenState extends State<TempleListMenuScreen> {
           children: [
             _utility.getBackGround(),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TempleSearchScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text('search'),
+                ),
                 Container(
                   margin: const EdgeInsets.symmetric(vertical: 10),
                   alignment: Alignment.topLeft,

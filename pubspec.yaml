@@ -22,17 +22,30 @@ dependencies:
   flutter_native_splash:
   flutter_polyline_points:
   font_awesome_flutter:
+
+  freezed_annotation:
+
   get:
   google_maps_flutter:
+
+  hooks_riverpod:
+
   http:
   intl:
 
+  json_annotation:
+
 dev_dependencies:
 
-  flutter_lints: ^1.0.0
+  build_runner:
+
+  flutter_lints:
 
   flutter_test:
     sdk: flutter
+
+  freezed:
+  json_serializable:
 
 flutter:
 
