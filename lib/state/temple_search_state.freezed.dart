@@ -16,7 +16,8 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$TempleSearchState {
-  AsyncValue<List<SearchData>> get record => throw _privateConstructorUsedError;
+//    required List<Map<String, dynamic>> record,
+  List<SearchData> get record => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $TempleSearchStateCopyWith<TempleSearchState> get copyWith =>
@@ -29,7 +30,7 @@ abstract class $TempleSearchStateCopyWith<$Res> {
           TempleSearchState value, $Res Function(TempleSearchState) then) =
       _$TempleSearchStateCopyWithImpl<$Res, TempleSearchState>;
   @useResult
-  $Res call({AsyncValue<List<SearchData>> record});
+  $Res call({List<SearchData> record});
 }
 
 /// @nodoc
@@ -51,7 +52,7 @@ class _$TempleSearchStateCopyWithImpl<$Res, $Val extends TempleSearchState>
       record: null == record
           ? _value.record
           : record // ignore: cast_nullable_to_non_nullable
-              as AsyncValue<List<SearchData>>,
+              as List<SearchData>,
     ) as $Val);
   }
 }
@@ -64,7 +65,7 @@ abstract class _$$_TempleSearchStateCopyWith<$Res>
       __$$_TempleSearchStateCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({AsyncValue<List<SearchData>> record});
+  $Res call({List<SearchData> record});
 }
 
 /// @nodoc
@@ -82,9 +83,9 @@ class __$$_TempleSearchStateCopyWithImpl<$Res>
   }) {
     return _then(_$_TempleSearchState(
       record: null == record
-          ? _value.record
+          ? _value._record
           : record // ignore: cast_nullable_to_non_nullable
-              as AsyncValue<List<SearchData>>,
+              as List<SearchData>,
     ));
   }
 }
@@ -92,10 +93,17 @@ class __$$_TempleSearchStateCopyWithImpl<$Res>
 /// @nodoc
 
 class _$_TempleSearchState implements _TempleSearchState {
-  const _$_TempleSearchState({required this.record});
+  const _$_TempleSearchState({required final List<SearchData> record})
+      : _record = record;
 
+//    required List<Map<String, dynamic>> record,
+  final List<SearchData> _record;
+//    required List<Map<String, dynamic>> record,
   @override
-  final AsyncValue<List<SearchData>> record;
+  List<SearchData> get record {
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_record);
+  }
 
   @override
   String toString() {
@@ -107,11 +115,12 @@ class _$_TempleSearchState implements _TempleSearchState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_TempleSearchState &&
-            (identical(other.record, record) || other.record == record));
+            const DeepCollectionEquality().equals(other._record, _record));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, record);
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(_record));
 
   @JsonKey(ignore: true)
   @override
@@ -122,12 +131,11 @@ class _$_TempleSearchState implements _TempleSearchState {
 }
 
 abstract class _TempleSearchState implements TempleSearchState {
-  const factory _TempleSearchState(
-          {required final AsyncValue<List<SearchData>> record}) =
+  const factory _TempleSearchState({required final List<SearchData> record}) =
       _$_TempleSearchState;
 
-  @override
-  AsyncValue<List<SearchData>> get record;
+  @override //    required List<Map<String, dynamic>> record,
+  List<SearchData> get record;
   @override
   @JsonKey(ignore: true)
   _$$_TempleSearchStateCopyWith<_$_TempleSearchState> get copyWith =>

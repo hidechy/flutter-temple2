@@ -1,11 +1,12 @@
-import 'dart:convert';
+// ignore_for_file: avoid_dynamic_calls
 
 import 'package:flutter/material.dart';
+import 'package:flutter_temple2/models/temple_search_model.dart';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:http/http.dart';
 
-import '../models/temple_search_model.dart';
+import '../data/http/client.dart';
+//import '../models/temple_search_model.dart';
 
 import '../state/temple_search_state.dart';
 
@@ -15,6 +16,8 @@ class TempleSearchScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final templeSearchState = ref.watch(templeSearchProvider);
+
+//    print(templeSearchState);
 
     return Scaffold(
       body: Column(
@@ -31,57 +34,122 @@ class TempleSearchScreen extends ConsumerWidget {
           Expanded(
             child: ListView.separated(
               itemBuilder: (context, index) {
-                final date =
-                    '${templeSearchState.record.value![index].year}-${templeSearchState.record.value![index].month}-${templeSearchState.record.value![index].day}';
+                final year = templeSearchState.record[index].year;
+                final month = templeSearchState.record[index].month;
+                final day = templeSearchState.record[index].day;
+                final date = '$year-$month-$day';
 
                 return Card(
                   child: ListTile(
                     title: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(date),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 120,
+                              child: Text(date),
+                            ),
+                            Expanded(
+                              child: dispTempleName(
+                                data: templeSearchState.record[index].data,
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
                 );
               },
               separatorBuilder: (context, index) => Container(),
-              itemCount: templeSearchState.record.value!.length,
+              itemCount: templeSearchState.record.length,
             ),
           ),
         ],
       ),
     );
   }
+
+  Widget dispTempleName({required List<TempleData> data}) {
+//    print(data as List<Map<String, dynamic>>);
+
+    print(data);
+    print(data.length);
+
+    return Container();
+  }
+
+// Widget dispTempleName({required data}) {
+//   print(data);
+//
+//   return Container();
+//
+//   // final list = <Widget>[];
+//   // for (var i = 0; i < data.length; i++) {
+//   //   list.add(Text(data[i].temple));
+//   // }
+//   //
+//   // return Wrap(
+//   //   children: list,
+//   // );
+// }
 }
+
+// ///
+// Widget dispTempleName({required List<TempleData> data}) {
+//   final list = <Widget>[];
+//   for (var i = 0; i < data.length; i++) {
+//     list.add(Text(data[i].temple));
+//   }
+//
+//   return Wrap(
+//     children: list,
+//   );
+// }
+//}
 
 ///////////////////////////////////////////////////////////////
 
 final templeSearchProvider =
     StateNotifierProvider.autoDispose<TempleSearchNotifier, TempleSearchState>(
         (ref) {
+  final client = ref.read(httpClientProvider);
+
   return TempleSearchNotifier(
-    const TempleSearchState(
-      record: AsyncValue<List<SearchData>>.loading(),
-    ),
+    const TempleSearchState(record: []),
+    client,
   );
 });
 
 class TempleSearchNotifier extends StateNotifier<TempleSearchState> {
-  TempleSearchNotifier(TempleSearchState state) : super(state);
+  TempleSearchNotifier(TempleSearchState state, this.client) : super(state);
+
+  final HttpClient client;
 
   ///
   Future<void> getSearchTemple({required String name}) async {
-    const url = 'http://toyohide.work/BrainLog/api/getTempleName';
-    final headers = <String, String>{'content-type': 'application/json'};
-    final body = json.encode({'name': name});
+    final response = await client.post(
+      path: 'getTempleName',
+      body: {'name': name},
+    ) as Map<String, dynamic>;
 
-    final response = await post(Uri.parse(url), headers: headers, body: body);
+//    var data = response['data'] as List<SearchData>;
 
-    final templeSearch = templeSearchFromJson(response.body);
+    List<SearchData> list = [];
+    for (var i = 0; i < response['data'].length; i++) {}
 
-    state = state.copyWith(
-      record: AsyncValue.data([...templeSearch.data]),
-    );
+    //
+    //
+    //
+    //
+    // state = state.copyWith(
+    //   record: response['data'] as List<SearchData>,
+    // );
+    //
+    //
+    //
+    //
   }
 }
