@@ -35,9 +35,13 @@ class HttpClient {
       headers: await _headers,
       body: json.encode(body),
     );
+    final bodyString = utf8.decode(response.bodyBytes);
 
     try {
-      return json.decode(response.body);
+      if (bodyString.isEmpty) {
+        throw Exception();
+      }
+      return jsonDecode(bodyString);
     } on Exception catch (_) {
       throw Exception('jason parse error');
     }

@@ -7,7 +7,6 @@ part 'temple_search_state.freezed.dart';
 @freezed
 class TempleSearchState with _$TempleSearchState {
   const factory TempleSearchState({
-//    required List<Map<String, dynamic>> record,
     required List<SearchData> record,
   }) = _TempleSearchState;
 }

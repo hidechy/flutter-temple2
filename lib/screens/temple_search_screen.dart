@@ -1,12 +1,12 @@
 // ignore_for_file: avoid_dynamic_calls
 
 import 'package:flutter/material.dart';
-import 'package:flutter_temple2/models/temple_search_model.dart';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../data/http/client.dart';
-//import '../models/temple_search_model.dart';
+
+import '../models/temple_search_model.dart';
 
 import '../state/temple_search_state.dart';
 
@@ -16,8 +16,6 @@ class TempleSearchScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final templeSearchState = ref.watch(templeSearchProvider);
-
-//    print(templeSearchState);
 
     return Scaffold(
       body: Column(
@@ -52,7 +50,7 @@ class TempleSearchScreen extends ConsumerWidget {
                               child: Text(date),
                             ),
                             Expanded(
-                              child: dispTempleName(
+                              child: getTempleName(
                                 data: templeSearchState.record[index].data,
                               ),
                             ),
@@ -72,43 +70,20 @@ class TempleSearchScreen extends ConsumerWidget {
     );
   }
 
-  Widget dispTempleName({required List<TempleData> data}) {
-//    print(data as List<Map<String, dynamic>>);
+  Widget getTempleName({required List<TempleData> data}) {
+    final list = <Widget>[];
+    for (var i = 0; i < data.length; i++) {
+      list.add(
+        Text(data[i].temple),
+      );
+    }
 
-    print(data);
-    print(data.length);
-
-    return Container();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: list,
+    );
   }
-
-// Widget dispTempleName({required data}) {
-//   print(data);
-//
-//   return Container();
-//
-//   // final list = <Widget>[];
-//   // for (var i = 0; i < data.length; i++) {
-//   //   list.add(Text(data[i].temple));
-//   // }
-//   //
-//   // return Wrap(
-//   //   children: list,
-//   // );
-// }
 }
-
-// ///
-// Widget dispTempleName({required List<TempleData> data}) {
-//   final list = <Widget>[];
-//   for (var i = 0; i < data.length; i++) {
-//     list.add(Text(data[i].temple));
-//   }
-//
-//   return Wrap(
-//     children: list,
-//   );
-// }
-//}
 
 ///////////////////////////////////////////////////////////////
 
@@ -130,26 +105,35 @@ class TempleSearchNotifier extends StateNotifier<TempleSearchState> {
 
   ///
   Future<void> getSearchTemple({required String name}) async {
-    final response = await client.post(
-      path: 'getTempleName',
-      body: {'name': name},
-    ) as Map<String, dynamic>;
+    await client
+        .post(path: 'getTempleName', body: {'name': name}).then((value) {
+      final list = <SearchData>[];
+      for (var i = 0; i < int.parse(value['data'].length.toString()); i++) {
+        final list2 = <TempleData>[];
+        for (var j = 0;
+            j < int.parse(value['data'][i]['data'].length.toString());
+            j++) {
+          list2.add(
+            TempleData(
+              temple: value['data'][i]['data'][j]['temple'].toString(),
+              address: value['data'][i]['data'][j]['address'].toString(),
+              lat: value['data'][i]['data'][j]['lat'].toString(),
+              lng: value['data'][i]['data'][j]['lng'].toString(),
+            ),
+          );
+        }
 
-//    var data = response['data'] as List<SearchData>;
+        list.add(
+          SearchData(
+            year: value['data'][i]['year'].toString(),
+            month: value['data'][i]['month'].toString(),
+            day: value['data'][i]['day'].toString(),
+            data: list2,
+          ),
+        );
+      }
 
-    List<SearchData> list = [];
-    for (var i = 0; i < response['data'].length; i++) {}
-
-    //
-    //
-    //
-    //
-    // state = state.copyWith(
-    //   record: response['data'] as List<SearchData>,
-    // );
-    //
-    //
-    //
-    //
+      state = state.copyWith(record: list);
+    });
   }
 }
